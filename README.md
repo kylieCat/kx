@@ -22,7 +22,7 @@ Use a dash as the context name to stay in the same context but change namespace
 
 Change context, keep the namespace set in .kube/config
 
-    $ kctx new-context
+    $ kx new-context
 
 Show current context and namespace
 
