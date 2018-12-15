@@ -138,7 +138,11 @@ Current	Context          	Namespace
 				return err
 			}
 		}
-		return conf.Save(defaultKubeConfig)
+		path, err := homedir.Expand(defaultKubeConfig)
+		if err != nil {
+			return err
+		}
+		return conf.Save(path)
 	},
 }
 
