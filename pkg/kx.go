@@ -5,7 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func GetConfig(path string) (*KubeConfig, error) {
+func GetKubeConfig(path string) (*KubeConfig, error) {
 	var rawFile []byte
 	rawFile, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -17,4 +17,18 @@ func GetConfig(path string) (*KubeConfig, error) {
 		return nil, err
 	}
 	return &kubeConfig, nil
+}
+
+func GetKxConfig(path string) (*KxConfig, error) {
+	var rawFile []byte
+	rawFile, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var kxConfig KxConfig
+	err = yaml.Unmarshal(rawFile, &kxConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &kxConfig, nil
 }

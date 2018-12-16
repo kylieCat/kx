@@ -15,9 +15,24 @@
 package cmd
 
 import (
-	"fmt"
+	"os"
+	"text/template"
+
 	"github.com/spf13/cobra"
 )
+
+const promptFuncTmpl = `#! /usr/bin/env bash
+
+__kctx() {
+    if [ -z "$KCTX_COLOR" ]; then
+        KCTX_COLOR="\033[0;38;5;38m"
+    fi
+	info=$(kx)
+	context="{{ .ContextColor }}${info%% *}{{ .ColorOff }}"
+	separator="{{ .SeparatorColor }}{{ .Separator }}{{ .ColorOff }}"
+	namespace="{{ .NamespaceColor }}${info#* }{{ .ColorOff }}"
+    printf "{{ .LeftWrapper}}${context}${separator}${namespace}{{ .RightWrapper }}\n"
+}`
 
 // setCmd represents the set command
 var promptCmd = &cobra.Command{
@@ -28,13 +43,9 @@ var promptCmd = &cobra.Command{
 Usage:
 export PROMPT_COMMAND=$(kx prompt)
 `,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println(`__kctx() {
-    if [ -z "$KCTX_COLOR" ]; then
-        KCTX_COLOR="\033[0;38;5;38m"
-    fi
-    printf "[${KCTX_COLOR}$(kx| awk '{print $1":"$2}')${COLOR_OFF}]\n"
-}`)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		t := template.Must(template.New("promptFunc").Parse(promptFuncTmpl))
+		return t.Execute(os.Stdout, kxConf.Prompt.FillColors())
 	},
 }
 

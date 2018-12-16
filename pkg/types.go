@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"github.com/kylie-a/kx/pkg/colors"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v2"
@@ -194,4 +195,33 @@ func (kc KubeConfig) Save(path string) error {
 		return err
 	}
 	return nil
+}
+
+type Prompt struct {
+	Separator      string `yaml:"separator" json:"separator"`
+	LeftWrapper    string `yaml:"leftWrapper" json:"leftWrapper"`
+	RightWrapper   string `yaml:"rightWrapper" json:"rightWrapper"`
+	ContextColor   string `yaml:"contextColor" json:"contextColor"`
+	NamespaceColor string `yaml:"namespaceColor" json:"namespaceColor"`
+	SeparatorColor string `yaml:"separatorColor" json:"separatorColor"`
+	ColorOff       string `json:"colorOff" yaml:"colorOff"`
+}
+
+func (p Prompt) FillColors() Prompt {
+	p.ContextColor = colors.Colors.Get(p.ContextColor)
+	p.NamespaceColor = colors.Colors.Get(p.NamespaceColor)
+	p.SeparatorColor = colors.Colors.Get(p.SeparatorColor)
+	return p
+}
+
+type Favorite struct {
+	Context   string `json:"context" yaml:"context"`
+	Namespace string `json:"namespace" yaml:"namespace"`
+}
+
+type Favorites map[string]Favorite
+
+type KxConfig struct {
+	Prompt    Prompt    `yaml:"prompt" json:"prompt"`
+	Favorites Favorites `json:"favorites" yaml:"favorites" `
 }

@@ -17,34 +17,35 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/mitchellh/go-homedir"
 	"os"
+	"path"
 
 	"github.com/kylie-a/kx/pkg"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 const (
-	placeholder          = "-"
-	defaultKubeConfig    = "~/.kube/config"
-	kblue                = "\033[0;38;5;38m"
-	colorOptionEnvVar    = "KX_COLOR"
-	kubeConfigEnvVar     = "KUBECONFIG"
+	placeholder       = "-"
+	defaultKubeConfig = "~/.kube/config"
+	kubeConfigEnvVar  = "KUBECONFIG"
 )
 
 var (
 	cfgFile     string
 	contextName string
 	ns          string
+	favorite    string
 )
 var (
 	all     bool
 	set     bool
 	noColor bool
 )
-var conf *pkg.KubeConfig
+var kubeConf *pkg.KubeConfig
+var kxConf *pkg.KxConfig
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -93,7 +94,7 @@ Current	Context          	Namespace
 		}
 		if len(args) >= 1 {
 			if args[0] == placeholder {
-				contextName = conf.CurrentContext
+				contextName = kubeConf.CurrentContext
 			} else {
 				contextName = args[0]
 			}
@@ -103,7 +104,7 @@ Current	Context          	Namespace
 				ns = args[1]
 			} else {
 				var err error
-				if ns, err = conf.GetNamespaceForContext(contextName); err != nil {
+				if ns, err = kubeConf.GetNamespaceForContext(contextName); err != nil {
 					return err
 				}
 			}
@@ -113,36 +114,37 @@ Current	Context          	Namespace
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
 			if all {
-				list(conf)
+				list(kubeConf)
 			} else {
-				if c, n, err := conf.GetCurrentContextAndNamespace(); err != nil {
+				if c, n, err := kubeConf.GetCurrentContextAndNamespace(); err != nil {
 					return err
 				} else {
 					fmt.Println(c, n)
 				}
 			}
-			os.Exit(0)
-		}
-		if contextName != placeholder {
-			if set {
-				conf.SetContext(contextName)
-			} else {
-				if err := conf.UseContext(contextName); err != nil {
-					fmt.Println(err.Error())
-					os.Exit(1)
+		} else {
+			if contextName != placeholder {
+				if set {
+					kubeConf.SetContext(contextName)
+				} else {
+					if err := kubeConf.UseContext(contextName); err != nil {
+						fmt.Println(err.Error())
+						os.Exit(1)
+					}
 				}
 			}
-		}
-		if ns != "" {
-			if err := conf.SetNamespaceForContext(contextName, ns); err != nil {
-				return err
+			if ns != "" {
+				if err := kubeConf.SetNamespaceForContext(contextName, ns); err != nil {
+					return err
+				}
 			}
+
 		}
 		path, err := homedir.Expand(defaultKubeConfig)
 		if err != nil {
 			return err
 		}
-		return conf.Save(path)
+		return kubeConf.Save(path)
 	},
 }
 
@@ -157,17 +159,43 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	initKubeConfig()
+	initKxConfig()
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kx.yaml)")
 	rootCmd.Flags().BoolVarP(&all, "all", "a", false, "Use to print list of contexts and namespace pairs")
 	rootCmd.Flags().BoolVarP(&set, "set", "s", false, "Act as 'kubectl config set-context' instead of 'kubectl config use-context'")
 	rootCmd.Flags().BoolVarP(&noColor, "no-color", "c", true, "Turn off color")
+	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
+}
+
+func initKubeConfig() {
+	var path, confPath string
+	var ok bool
+	var err error
+
+	if path, ok = os.LookupEnv(kubeConfigEnvVar); !ok {
+		path = defaultKubeConfig
+	}
+
+	if confPath, err = homedir.Expand(path); err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
+	kubeConf, _ = pkg.GetKubeConfig(confPath)
+}
+
+func initKxConfig() {
+	home, err := homedir.Dir()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	kxPath := path.Join(home, ".kx.yaml")
+	kxConf, _ = pkg.GetKxConfig(kxPath)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	var confPath string
-	var err error
-
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -186,13 +214,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("broken config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Println("broken config file:", err.Error())
 	}
-
-	if confPath, err = homedir.Expand(defaultKubeConfig); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
-	conf, _ = pkg.GetConfig(confPath)
 }
