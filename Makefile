@@ -4,3 +4,6 @@ build:
 
 install:
 	@go install
+
+release:
+	@git commit -am "Incrementing $(part) version from $(waypoint latest) ->"
