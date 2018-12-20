@@ -24,6 +24,15 @@ Change context, keep the namespace set in .kube/config
 
     $ kx new-context
 
+Generate tab completion for the contexts in your kubeconfig
+
+    $ eval "$(kx complete)"
+    $ kx <tab><tab>
+    foo-prd        gke_prd-usc1-1     foo-test
+    foo-gke-prd    int-usw1a          stg-use1a
+    foo-gke-stg    minikube           stg-use1b
+    
+
 Show current context and namespace
 
     $ kx
@@ -133,7 +142,7 @@ Favorites are also stored in in `.kx.yaml`. Should be pretty obvious how these w
 
 - [X] Work with custom locations of kubeconfig via the `KUBECONFIG` env var.
 - [X] Support for favorite ctx/namespace pairs.
-- [ ] Add context names to bash completion.
+- [X] Add context names to bash completion.
 - [ ] Work with locations of kubeconfig passed via the command line.
 - [ ] Return to previous context/namespace
 - [ ] Command to show color options.

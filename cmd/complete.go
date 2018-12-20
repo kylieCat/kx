@@ -17,19 +17,42 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"os"
 )
+
+const completeScript = `function _listkx()
+{
+	# https://www.gnu.org/software/bash/manual/html_node/Programmable-Completion-Builtins.html
+    local cur
+
+    cur=${COMP_WORDS[COMP_CWORD]}
+    case ${COMP_CWORD} in
+        1)
+            COMPREPLY=($(compgen -W "$(kx -a | tail -n +2 |awk 'BEGIN {FS="\t"}; {print $2}')" -- ${cur}))
+            ;;
+    esac
+}
+
+complete -F _listkx kx`
 
 // setCmd represents the set command
 var completeCmd = &cobra.Command{
 	Use:   "complete",
 	Short: "Bash completion",
-	Long: `Bash completion`,
+	Long: `To load completion run
+
+	$ eval "$(kx complete)"
+
+To configure your bash shell to load completions for each session add to your bashrc
+
+	# ~/.bashrc or ~/.profile
+	eval "$(kx complete)"
+
+Or
+
+	kx complete > ./.kxcomplete; source ./kxcomplete
+`,
 	Run: func(cmd *cobra.Command, args []string) {
-		err := rootCmd.GenBashCompletion(os.Stdout)
-		if err != nil {
-			fmt.Println(err.Error())
-		}
+		fmt.Println(completeScript)
 	},
 }
 
