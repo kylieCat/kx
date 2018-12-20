@@ -1,8 +1,11 @@
 package pkg
 
 import (
-	"github.com/kylie-a/kx/pkg/colors"
+	"fmt"
 	"io/ioutil"
+	"strings"
+
+	"github.com/kylie-a/kx/pkg/colors"
 
 	"gopkg.in/yaml.v2"
 )
@@ -214,14 +217,89 @@ func (p Prompt) FillColors() Prompt {
 	return p
 }
 
-type Favorite struct {
+type CtxNsPair struct {
 	Context   string `json:"context" yaml:"context"`
 	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
-type Favorites map[string]Favorite
+type Favorites map[string]CtxNsPair
+
+func (favorites Favorites) AddFavorite(name, ctx, ns string) {
+	favorites[name] = CtxNsPair{Context: ctx, Namespace: ns}
+}
+
+func (favorites Favorites) GetFavorite(name string) (CtxNsPair, bool) {
+	pair, ok := favorites[name]
+	return pair, ok
+}
+
+func (favorites Favorites) IsFavorite(ctx, ns string) (string, bool) {
+	for name, favorite := range favorites {
+		if favorite.Context == ctx && favorite.Namespace == ns {
+			return name, true
+		}
+	}
+	return "", false
+}
+
+func (favorites Favorites) FavoritesForContext(name string) Favorites {
+	faves := make(Favorites)
+	for faveName, favorite := range favorites {
+		if favorite.Context == name {
+			faves[faveName] = favorite
+		}
+	}
+	return faves
+}
+
+func (favorites Favorites) String() string {
+	var faves []string
+
+	for faveName, fave := range favorites {
+		faves = append(faves, fmt.Sprintf("%s=%s:%s", faveName, fave.Context, fave.Namespace))
+	}
+	return strings.Join(faves, ",")
+}
 
 type KxConfig struct {
+	Path      string
 	Prompt    Prompt    `yaml:"prompt" json:"prompt"`
-	Favorites Favorites `json:"favorites" yaml:"favorites" `
+	Favorites Favorites `json:"favorites" yaml:"favorites"`
+	Previous  CtxNsPair `json:"previous" yaml:"previous"`
+	changed   bool
+}
+
+func (kx KxConfig) Changed() bool {
+	return kx.changed
+}
+
+func (kx KxConfig) Save(path string) error {
+	var fileContents []byte
+	var err error
+
+	if fileContents, err = yaml.Marshal(kx); err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(path, fileContents, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (kx *KxConfig) AddFavorite(name, ctx, ns string) error {
+	kx.Favorites.AddFavorite(name, ctx, ns)
+	kx.changed = true
+	return nil
+}
+
+func (kx KxConfig) GetFavorite(name string) (CtxNsPair, bool) {
+	return kx.Favorites.GetFavorite(name)
+}
+
+func (kx KxConfig) IsFavorite(ctx, ns string) (string, bool) {
+	return kx.Favorites.IsFavorite(ctx, ns)
+}
+
+func (kx KxConfig) FavoritesForContext(name string) Favorites {
+	return kx.Favorites.FavoritesForContext(name)
 }

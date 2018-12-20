@@ -30,5 +30,8 @@ func GetKxConfig(path string) (*KxConfig, error) {
 	if err != nil {
 		return nil, err
 	}
+	if kxConfig.Favorites == nil {
+		kxConfig.Favorites = make(Favorites)
+	}
 	return &kxConfig, nil
 }

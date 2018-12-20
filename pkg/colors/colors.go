@@ -131,7 +131,7 @@ var Colors = ConsoleColors{
 	"Magenta2":          "\033[0;38;5;165m",
 	"Magenta3":          "\033[0;38;5;127m",
 	"Maroon":            "\033[0;38;5;1m",
-	"MayaBlue": "\033[0;38;5;81m",
+	"MayaBlue":          "\033[0;38;5;81m",
 	"MediumOrchid1":     "\033[0;38;5;207m",
 	"Mediumorchid1":     "\033[0;38;5;171m",
 	"Mediumorchid3":     "\033[0;38;5;133m",

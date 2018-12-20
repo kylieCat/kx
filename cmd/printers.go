@@ -23,7 +23,7 @@ import (
 
 func list(conf *pkg.KubeConfig) {
 	table := uitable.New()
-	table.AddRow("Current", "Context", "Namespace")
+	table.AddRow("Current", "Context", "Namespace", "Favorites")
 	marker := ""
 	sort.Sort(conf.Contexts)
 	for _, ctx := range conf.Contexts {
@@ -32,7 +32,8 @@ func list(conf *pkg.KubeConfig) {
 		} else {
 			marker = ""
 		}
-		table.AddRow(marker, ctx.Name, ctx.ContextConf.Namespace)
+		favesForCtx := kxConf.FavoritesForContext(ctx.Name)
+		table.AddRow(marker, ctx.Name, ctx.ContextConf.Namespace, favesForCtx.String())
 	}
 	fmt.Println(table)
 }

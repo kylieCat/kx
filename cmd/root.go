@@ -17,9 +17,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"os"
 	"path"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/kylie-a/kx/pkg"
 
@@ -44,6 +45,7 @@ var (
 	set     bool
 	noColor bool
 )
+
 var kubeConf *pkg.KubeConfig
 var kxConf *pkg.KxConfig
 
@@ -128,8 +130,18 @@ Current	Context          	Namespace
 					kubeConf.SetContext(contextName)
 				} else {
 					if err := kubeConf.UseContext(contextName); err != nil {
-						fmt.Println(err.Error())
-						os.Exit(1)
+						ctxPair, ok := kxConf.GetFavorite(contextName)
+						if !ok {
+							return err
+						}
+						if err = kubeConf.UseContext(ctxPair.Context); err != nil {
+							return errors.New("error setting context from favorite: " + err.Error())
+						}
+						if err = kubeConf.SetNamespaceForContext(ctxPair.Context, ctxPair.Namespace); err != nil {
+							return errors.New("error setting namespace from favorite: " + err.Error())
+						}
+						path := getKubePath()
+						return kubeConf.Save(path)
 					}
 				}
 			}
@@ -138,13 +150,31 @@ Current	Context          	Namespace
 					return err
 				}
 			}
-
+		}
+		if cmd.Flag("favorite").Changed {
+			if err := kxConf.AddFavorite(favorite, contextName, ns); err != nil {
+				return err
+			}
 		}
 		path, err := homedir.Expand(defaultKubeConfig)
 		if err != nil {
 			return err
 		}
 		return kubeConf.Save(path)
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		if kxConf.Changed() {
+			home, err := homedir.Dir()
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			kxPath := path.Join(home, ".kx.yaml")
+			if err = kxConf.Save(kxPath); err != nil {
+				return err
+			}
+		}
+		return nil
 	},
 }
 
@@ -168,19 +198,28 @@ func init() {
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
 }
 
-func initKubeConfig() {
-	var path, confPath string
+func getKubePath() string {
+	var confPath string
 	var ok bool
 	var err error
 
-	if path, ok = os.LookupEnv(kubeConfigEnvVar); !ok {
-		path = defaultKubeConfig
+	if confPath, ok = os.LookupEnv(kubeConfigEnvVar); !ok {
+		confPath = defaultKubeConfig
 	}
 
-	if confPath, err = homedir.Expand(path); err != nil {
-		fmt.Println(err.Error())
+	if confPath, err = homedir.Expand(confPath); err != nil {
+		fmt.Printf("error loading kube config from path %s: %s", confPath, err.Error())
 		os.Exit(1)
 	}
+	return confPath
+}
+
+func initKubeConfig() {
+	var confPath string
+
+	confPath = getKubePath()
+
+
 	kubeConf, _ = pkg.GetKubeConfig(confPath)
 }
 
@@ -191,7 +230,7 @@ func initKxConfig() {
 		os.Exit(1)
 	}
 	kxPath := path.Join(home, ".kx.yaml")
-	kxConf, _ = pkg.GetKxConfig(kxPath)
+	kxConf, err = pkg.GetKxConfig(kxPath)
 }
 
 // initConfig reads in config file and ENV variables if set.
