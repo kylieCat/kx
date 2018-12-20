@@ -6,4 +6,4 @@ install:
 	@go install
 
 release:
-	@git commit -am "Incrementing $(part) version from $(shell waypoint latest kx) -> $(shell waypoint bump --$(part))"
+	@git commit -am "Incrementing $(part) version from $(shell waypoint latest kx) -> $(shell waypoint bump kx --$(part))"
