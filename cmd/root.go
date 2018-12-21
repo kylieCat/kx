@@ -15,23 +15,20 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
-	"path"
-
-	"github.com/mitchellh/go-homedir"
 
 	"github.com/kylie-a/kx/pkg"
-
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 const (
 	placeholder       = "-"
 	defaultKubeConfig = "~/.kube/config"
 	kubeConfigEnvVar  = "KUBECONFIG"
+	kxConfigEnvVar    = "KXCONFIG"
+	defaultKxConfig   = "~/.kx.yaml"
 )
 
 var (
@@ -39,6 +36,8 @@ var (
 	contextName string
 	ns          string
 	favorite    string
+	kubePath    string
+	kxPath      string
 )
 var (
 	all     bool
@@ -85,33 +84,7 @@ Current	Context          	Namespace
        	foo-gke-stg      	foo
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			return nil
-		}
-		if len(args) > 2 {
-			return errors.New("too many args")
-		}
-		if len(args) == 1 && args[0] == placeholder {
-			return errors.New("invalid args")
-		}
-		if len(args) >= 1 {
-			if args[0] == placeholder {
-				contextName = kubeConf.CurrentContext
-			} else {
-				contextName = args[0]
-			}
-		}
-		if len(args) == 2 {
-			if args[1] != placeholder {
-				ns = args[1]
-			} else {
-				var err error
-				if ns, err = kubeConf.GetNamespaceForContext(contextName); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
+		return validateArgs(args)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
@@ -126,23 +99,8 @@ Current	Context          	Namespace
 			}
 		} else {
 			if contextName != placeholder {
-				if set {
-					kubeConf.SetContext(contextName)
-				} else {
-					if err := kubeConf.UseContext(contextName); err != nil {
-						ctxPair, ok := kxConf.GetFavorite(contextName)
-						if !ok {
-							return err
-						}
-						if err = kubeConf.UseContext(ctxPair.Context); err != nil {
-							return errors.New("error setting context from favorite: " + err.Error())
-						}
-						if err = kubeConf.SetNamespaceForContext(ctxPair.Context, ctxPair.Namespace); err != nil {
-							return errors.New("error setting namespace from favorite: " + err.Error())
-						}
-						path := getKubePath()
-						return kubeConf.Save(path)
-					}
+				if err := updateContext(contextName, set); err != nil {
+					return err
 				}
 			}
 			if ns != "" {
@@ -151,28 +109,17 @@ Current	Context          	Namespace
 				}
 			}
 		}
+
 		if cmd.Flag("favorite").Changed {
 			if err := kxConf.AddFavorite(favorite, contextName, ns); err != nil {
 				return err
 			}
 		}
-		path, err := homedir.Expand(defaultKubeConfig)
-		if err != nil {
-			return err
-		}
-		return kubeConf.Save(path)
+		return kubeConf.Save(kubePath)
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
 		if kxConf.Changed() {
-			home, err := homedir.Dir()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
-			kxPath := path.Join(home, ".kx.yaml")
-			if err = kxConf.Save(kxPath); err != nil {
-				return err
-			}
+			return kxConf.Save(kxPath)
 		}
 		return nil
 	},
@@ -188,9 +135,7 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-	initKubeConfig()
-	initKxConfig()
+	cobra.OnInitialize(initConfigPaths, initKubeConfig, initKxConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kx.yaml)")
 	rootCmd.Flags().BoolVarP(&all, "all", "a", false, "Use to print list of contexts and namespace pairs")
 	rootCmd.Flags().BoolVarP(&set, "set", "s", false, "Act as 'kubectl config set-context' instead of 'kubectl config use-context'")
@@ -198,62 +143,42 @@ func init() {
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
 }
 
-func getKubePath() string {
-	var confPath string
+func getEnvOrDefault(envVar, defaultVal string) string {
+	var val string
 	var ok bool
+
+	if val, ok = os.LookupEnv(envVar); !ok {
+		val = defaultVal
+	}
+	return val
+}
+
+func getPathFromEnv(envVar, defaultValue string) string {
+	var filePath string
 	var err error
 
-	if confPath, ok = os.LookupEnv(kubeConfigEnvVar); !ok {
-		confPath = defaultKubeConfig
-	}
-
-	if confPath, err = homedir.Expand(confPath); err != nil {
-		fmt.Printf("error loading kube config from path %s: %s", confPath, err.Error())
+	filePath = getEnvOrDefault(envVar, defaultValue)
+	if filePath, err = homedir.Expand(filePath); err != nil {
+		fmt.Printf("error loading config from path %s set in %s: %s\n", filePath, envVar, err.Error())
 		os.Exit(1)
 	}
-	return confPath
+	return filePath
+}
+
+func initConfigPaths() {
+	kubePath = getPathFromEnv(kubeConfigEnvVar, defaultKubeConfig)
+	kxPath = getPathFromEnv(kxConfigEnvVar, defaultKxConfig)
 }
 
 func initKubeConfig() {
-	var confPath string
+	var err error
 
-	confPath = getKubePath()
-
-
-	kubeConf, _ = pkg.GetKubeConfig(confPath)
+	if kubeConf, err = pkg.GetKubeConfig(kubePath); err != nil {
+		fmt.Printf("error loading kubeconfig from path %s: %s\n", kubePath, err.Error())
+		os.Exit(1)
+	}
 }
 
 func initKxConfig() {
-	home, err := homedir.Dir()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	kxPath := path.Join(home, ".kx.yaml")
-	kxConf, err = pkg.GetKxConfig(kxPath)
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		// Search config in home directory with name ".kx" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".kx")
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("broken config file:", err.Error())
-	}
+	kxConf = pkg.GetKxConfig(kxPath)
 }
