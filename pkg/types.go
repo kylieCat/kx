@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/kylie-a/kx/pkg/colors"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -292,14 +291,23 @@ func (kx *KxConfig) AddFavorite(name, ctx, ns string) error {
 	return nil
 }
 
-func (kx KxConfig) GetFavorite(name string) (CtxNsPair, bool) {
+func (kx *KxConfig) GetFavorite(name string) (CtxNsPair, bool) {
+	if kx == nil {
+		return CtxNsPair{}, false
+	}
 	return kx.Favorites.GetFavorite(name)
 }
 
-func (kx KxConfig) IsFavorite(ctx, ns string) (string, bool) {
+func (kx *KxConfig) IsFavorite(ctx, ns string) (string, bool) {
+	if kx == nil {
+		return "", false
+	}
 	return kx.Favorites.IsFavorite(ctx, ns)
 }
 
-func (kx KxConfig) FavoritesForContext(name string) Favorites {
+func (kx *KxConfig) FavoritesForContext(name string) Favorites {
+	if kx == nil {
+		return make(Favorites)
+	}
 	return kx.Favorites.FavoritesForContext(name)
 }
