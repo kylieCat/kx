@@ -19,16 +19,11 @@ import (
 	"os"
 
 	"github.com/kylie-a/kx/pkg"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 )
 
 const (
-	placeholder       = "-"
-	defaultKubeConfig = "~/.kube/config"
-	kubeConfigEnvVar  = "KUBECONFIG"
-	kxConfigEnvVar    = "KXCONFIG"
-	defaultKxConfig   = "~/.kx.yaml"
+	placeholder = "-"
 )
 
 var (
@@ -143,31 +138,9 @@ func init() {
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
 }
 
-func getEnvOrDefault(envVar, defaultVal string) string {
-	var val string
-	var ok bool
-
-	if val, ok = os.LookupEnv(envVar); !ok {
-		val = defaultVal
-	}
-	return val
-}
-
-func getPathFromEnv(envVar, defaultValue string) string {
-	var filePath string
-	var err error
-
-	filePath = getEnvOrDefault(envVar, defaultValue)
-	if filePath, err = homedir.Expand(filePath); err != nil {
-		fmt.Printf("error loading config from path %s set in %s: %s\n", filePath, envVar, err.Error())
-		os.Exit(1)
-	}
-	return filePath
-}
-
 func initConfigPaths() {
-	kubePath = getPathFromEnv(kubeConfigEnvVar, defaultKubeConfig)
-	kxPath = getPathFromEnv(kxConfigEnvVar, defaultKxConfig)
+	kubePath = pkg.GetKubeConfigPath()
+	kxPath = pkg.GetKxConfigPath()
 }
 
 func initKubeConfig() {
