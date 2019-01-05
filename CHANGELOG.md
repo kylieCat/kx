@@ -1,5 +1,11 @@
 # kx Changelog
 
+### 0.3.1 - 2019-01-05T02:37:13Z
+
+- Bugfix: minikube config struct was wrong, caused broken files
+- Stopped unnecessarily writing file after read-only ops.
+- omit empty fields in kube conf
+
 ### 0.3.0- 2018-12-21T21:00:00Z
 
 - Move some utility functions from the `cmd` package to `pkg`
