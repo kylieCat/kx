@@ -75,12 +75,12 @@ func (contexts Contexts) GetNamespaceForContext(name string) (string, error) {
 type Preferences struct{}
 
 type AuthProviderConfig struct {
-	AccessToken string `yaml:"access-token"`
-	CmdArgs     string `yaml:"cmd-args"`
-	CmdPath     string `yaml:"cmd-path"`
-	Expiry      string `yaml:"expiry"`
-	ExpiryKey   string `yaml:"expiry-key"`
-	TokenKey    string `yaml:"token-key"`
+	AccessToken string `yaml:"access-token,omitempty"`
+	CmdArgs     string `yaml:"cmd-args,omitempty"`
+	CmdPath     string `yaml:"cmd-path,omitempty"`
+	Expiry      string `yaml:"expiry,omitempty"`
+	ExpiryKey   string `yaml:"expiry-key,omitempty"`
+	TokenKey    string `yaml:"token-key,omitempty"`
 }
 
 type AuthProvider struct {
@@ -89,12 +89,12 @@ type AuthProvider struct {
 }
 
 type UserConf struct {
-	AuthProvider      AuthProvider `yaml:"auth-provider"`
-	Password          string       `yaml:"password"`
-	Username          string       `yaml:"username"`
-	Token             string       `yaml:"token"`
-	ClientCertificate string       `yaml:"clientCertificate"`
-	ClientKey         string       `yaml:"clientKey"`
+	AuthProvider      AuthProvider `yaml:"auth-provider,omitempty"`
+	Password          string       `yaml:"password,omitempty"`
+	Username          string       `yaml:"username,omitempty"`
+	Token             string       `yaml:"token,omitempty"`
+	ClientCertificate string       `yaml:"client-certificate,omitempty"`
+	ClientKey         string       `yaml:"client-key,omitempty"`
 }
 
 type User struct {

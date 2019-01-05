@@ -92,6 +92,7 @@ Current	Context          	Namespace
 					fmt.Println(c, n)
 				}
 			}
+			return nil
 		} else {
 			if contextName != placeholder {
 				if err := updateContext(contextName, set); err != nil {
@@ -133,7 +134,6 @@ func init() {
 	cobra.OnInitialize(initConfigPaths, initKubeConfig, initKxConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kx.yaml)")
 	rootCmd.Flags().BoolVarP(&all, "all", "a", false, "Use to print list of contexts and namespace pairs")
-	rootCmd.Flags().BoolVarP(&set, "set", "s", false, "Act as 'kubectl config set-context' instead of 'kubectl config use-context'")
 	rootCmd.Flags().BoolVarP(&noColor, "no-color", "c", true, "Turn off color")
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
 }
