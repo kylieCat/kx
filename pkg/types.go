@@ -10,8 +10,9 @@ import (
 )
 
 type ClusterConf struct {
-	CertificateAuthorityData interface{} `yaml:"certificate-authority-data"`
-	Server                   interface{} `yaml:"server"`
+	CertificateAuthorityData string `yaml:"certificate-authority-data,omitempty"`
+	CertificateAuthority     string `yaml:"certificate-authority,omitempty"`
+	Server                   string `yaml:"server,omitempty"`
 }
 
 type Cluster struct {
