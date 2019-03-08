@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 """
-Shamelessly copied to the kx project from: https://gist.github.com/naupaka/a300868203f32906717a1644c1c6f0d7
+Shamelessly copied to the kx project from: https://gist.github.com/MicahElliott/719710
 
 Thanks Micah!
 

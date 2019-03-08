@@ -155,4 +155,4 @@ Favorites are also stored in in `.kx.yaml`. Should be pretty obvious how these w
 
 Thanks to the following folks for helping out, you guys rock!
 
- - [Naupaka Zimmerman](https://gist.github.com/naupaka): Author of the [colortrans.py script](https://gist.github.com/naupaka/a300868203f32906717a1644c1c6f0d7) to convert between RGB and xterm-256 color codes
+ - [Micah Elliot](https://gist.github.com/MicahElliott): Author of the [colortrans.py script](https://gist.github.com/naupaka/a300868203f32906717a1644c1c6f0d7) to convert between RGB and xterm-256 color codes
