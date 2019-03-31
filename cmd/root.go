@@ -33,6 +33,7 @@ var (
 	favorite    string
 	kubePath    string
 	kxPath      string
+	newName     string
 )
 var (
 	all     bool
@@ -89,6 +90,7 @@ Current	Context          	Namespace
 				if c, n, err := kubeConf.GetCurrentContextAndNamespace(); err != nil {
 					return err
 				} else {
+					fmt.Println("oo")
 					fmt.Println(c, n)
 				}
 			}
@@ -108,6 +110,15 @@ Current	Context          	Namespace
 
 		if cmd.Flag("favorite").Changed {
 			if err := kxConf.AddFavorite(favorite, contextName, ns); err != nil {
+				return err
+			}
+		}
+
+		if cmd.Flag("rename").Changed {
+			if err := kubeConf.RenameContext(contextName, newName); err != nil {
+				return err
+			}
+			if err := updateContext(newName, set); err != nil {
 				return err
 			}
 		}
@@ -136,6 +147,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&all, "all", "a", false, "Use to print list of contexts and namespace pairs")
 	rootCmd.Flags().BoolVarP(&noColor, "no-color", "c", true, "Turn off color")
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
+	rootCmd.Flags().StringVarP(&newName, "rename", "r", "", "Change the name of a context")
 }
 
 func initConfigPaths() {

@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"encoding/json"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -148,4 +149,16 @@ func (kc KubeConfig) GetClusterUserData(ctxName string) (*ClusterUserData, error
 		Ctx:     CtxNsPair{Context: ctx.Name, Namespace: ctx.ContextConf.Namespace},
 	}
 	return userClusterData, nil
+}
+
+func (kc KubeConfig) RenameContext(contextName, newName string) error {
+	var ctx *Context
+	var err error
+
+	if ctx, err = kc.Contexts.GetContext(contextName); err != nil {
+	    return err
+	}
+	fmt.Println(contextName, newName)
+	ctx.Name = newName
+	return nil
 }
