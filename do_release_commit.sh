@@ -5,7 +5,7 @@ PART=$1
 get_message () {
     part=${1}
     prevVer=$(waypoint latest)
-    newVer=$(waypoint bump kx --${part})
+    newVer=$(waypoint bump --${part})
     clog=$(tail -n +3 CHANGELOG.md)
     clog=${clog%\#\#\# ${prevVer}*}
     printf "%s\n\n${clog}" "Incrementing ${part} version from *${prevVer}* -> *${newVer}*"

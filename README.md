@@ -143,10 +143,10 @@ Favorites are also stored in in `.kx.yaml`. Should be pretty obvious how these w
 - [X] Work with custom locations of kubeconfig via the `KUBECONFIG` env var.
 - [X] Support for favorite ctx/namespace pairs.
 - [X] Add context names to bash completion.
+- [X] Ability to rename contexts.
 - [ ] Work with locations of kubeconfig passed via the command line.
 - [ ] Return to previous context/namespace
 - [ ] Command to show color options.
-- [ ] Ability to rename contexts.
 - [ ] Code clean up.
 - [ ] Better error messaging.
 

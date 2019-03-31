@@ -298,3 +298,84 @@ CLUT = [  # color look-up table
 
 def _str2hex(hexstr):
     return int(hexstr, 16)
+
+def _strip_hash(rgb):
+    # Strip leading `#` if exists.
+    if rgb.startswith('#'):
+        rgb = rgb.lstrip('#')
+    return rgb
+
+def _create_dicts():
+    short2rgb_dict = dict(CLUT)
+    rgb2short_dict = {}
+    for k, v in short2rgb_dict.items():
+        rgb2short_dict[v] = k
+    return rgb2short_dict, short2rgb_dict
+
+def short2rgb(short):
+    return SHORT2RGB_DICT[short]
+
+def print_all():
+    """ Print all 256 xterm color codes.
+    """
+    for short, rgb in CLUT:
+        sys.stdout.write('\033[48;5;%sm%s:%s' % (short, short, rgb))
+        sys.stdout.write("\033[0m  ")
+        sys.stdout.write('\033[38;5;%sm%s:%s' % (short, short, rgb))
+        sys.stdout.write("\033[0m\n")
+    print "Printed all codes."
+    print "You can translate a hex or 0-255 code by providing an argument."
+
+def rgb2short(rgb):
+    """ Find the closest xterm-256 approximation to the given RGB value.
+    @param rgb: Hex code representing an RGB value, eg, 'abcdef'
+    @returns: String between 0 and 255, compatible with xterm.
+    >>> rgb2short('123456')
+    ('23', '005f5f')
+    >>> rgb2short('ffffff')
+    ('231', 'ffffff')
+    >>> rgb2short('0DADD6') # vimeo logo
+    ('38', '00afd7')
+    """
+    rgb = _strip_hash(rgb)
+    incs = (0x00, 0x5f, 0x87, 0xaf, 0xd7, 0xff)
+    # Break 6-char RGB code into 3 integer vals.
+    parts = [ int(h, 16) for h in re.split(r'(..)(..)(..)', rgb)[1:4] ]
+    res = []
+    for part in parts:
+        i = 0
+        while i < len(incs)-1:
+            s, b = incs[i], incs[i+1]  # smaller, bigger
+            if s <= part <= b:
+                s1 = abs(s - part)
+                b1 = abs(b - part)
+                if s1 < b1: closest = s
+                else: closest = b
+                res.append(closest)
+                break
+            i += 1
+    #print '***', res
+    res = ''.join([ ('%02.x' % i) for i in res ])
+    equiv = RGB2SHORT_DICT[ res ]
+    #print '***', res, equiv
+    return equiv, res
+
+RGB2SHORT_DICT, SHORT2RGB_DICT = _create_dicts()
+
+#---------------------------------------------------------------------
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+    if len(sys.argv) == 1:
+        print_all()
+        raise SystemExit
+    arg = sys.argv[1]
+    if len(arg) < 4 and int(arg) < 256:
+        rgb = short2rgb(arg)
+        sys.stdout.write('xterm color \033[38;5;%sm%s\033[0m -> RGB exact \033[38;5;%sm%s\033[0m' % (arg, arg, arg, rgb))
+        sys.stdout.write("\033[0m\n")
+    else:
+        short, rgb = rgb2short(arg)
+        sys.stdout.write('RGB %s -> xterm color approx \033[38;5;%sm%s (%s)' % (arg, short, short, rgb))
+        sys.stdout.write("\033[0m\n")
