@@ -1,5 +1,11 @@
 # kx Changelog
 
+### 0.4.0 - 2019-03-31
+
+- New feature: ability to rename a context using `-r`. See README for example
+- New feature: ability to swap back to a previous context/namespace. See README for example
+- General code cleanup
+
 ### 0.3.1 - 2019-01-05T02:37:13Z
 
 - Bugfix: minikube config struct was wrong, caused broken files
