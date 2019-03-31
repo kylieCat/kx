@@ -23,7 +23,8 @@ import (
 )
 
 const (
-	placeholder = "-"
+	placeholder    = "-"
+	previousMarker = "--"
 )
 
 var (
@@ -36,9 +37,10 @@ var (
 	newName     string
 )
 var (
-	all     bool
-	set     bool
-	noColor bool
+	all      bool
+	set      bool
+	noColor  bool
+	previous bool
 )
 
 var kubeConf *pkg.KubeConfig
@@ -87,24 +89,16 @@ Current	Context          	Namespace
 			if all {
 				list(kubeConf)
 			} else {
-				if c, n, err := kubeConf.GetCurrentContextAndNamespace(); err != nil {
+				if ctxPair, err := kubeConf.GetCurrentContextAndNamespace(); err != nil {
 					return err
 				} else {
-					fmt.Println("oo")
-					fmt.Println(c, n)
+					fmt.Println(ctxPair)
 				}
 			}
 			return nil
 		} else {
-			if contextName != placeholder {
-				if err := updateContext(contextName, set); err != nil {
-					return err
-				}
-			}
-			if ns != "" {
-				if err := kubeConf.SetNamespaceForContext(contextName, ns); err != nil {
-					return err
-				}
+			if err := updateContext(contextName, ns, set); err != nil {
+				return err
 			}
 		}
 
@@ -118,7 +112,7 @@ Current	Context          	Namespace
 			if err := kubeConf.RenameContext(contextName, newName); err != nil {
 				return err
 			}
-			if err := updateContext(newName, set); err != nil {
+			if err := updateContext(newName, "", set); err != nil {
 				return err
 			}
 		}

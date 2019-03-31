@@ -2,7 +2,6 @@ package pkg
 
 import (
 	"encoding/json"
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -41,13 +40,14 @@ func (kc KubeConfig) GetNamespaceForCurrentContext() (string, error) {
 	return ctx.ContextConf.Namespace, nil
 }
 
-func (kc KubeConfig) GetCurrentContextAndNamespace() (string, string, error) {
+func (kc KubeConfig) GetCurrentContextAndNamespace() (CtxNsPair, error) {
 	ctxName := kc.GetCurrentContextName()
 	ns, err := kc.GetNamespaceForCurrentContext()
 	if err != nil {
-		return "", "", err
+		return CtxNsPair{}, err
 	}
-	return ctxName, ns, nil
+	ctxPair := CtxNsPair{Context: ctxName, Namespace: ns}
+	return ctxPair, nil
 }
 
 func (kc *KubeConfig) SetContext(name string) {
@@ -158,7 +158,6 @@ func (kc KubeConfig) RenameContext(contextName, newName string) error {
 	if ctx, err = kc.Contexts.GetContext(contextName); err != nil {
 	    return err
 	}
-	fmt.Println(contextName, newName)
 	ctx.Name = newName
 	return nil
 }

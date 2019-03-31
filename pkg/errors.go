@@ -31,3 +31,17 @@ func NewCannotSetContextError(name string) CannotSetContextError {
 	message := fmt.Sprintf("no context exists with the name: %s", name)
 	return CannotSetContextError{Message: message}
 }
+
+// NoPreviousContextError is a custom error type.
+type NoPreviousContextError struct {
+	Message string
+}
+
+func (e NoPreviousContextError) Error() string {
+	return e.Message
+}
+
+// NewNoPreviousContextError creates a new `NoPreviousContextError`.
+func NewNoPreviousContextError() NoPreviousContextError {
+	return NoPreviousContextError{Message: "there are no previous contexts stored in kx config"}
+}

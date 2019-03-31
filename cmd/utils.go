@@ -31,7 +31,9 @@ func validateArgs(args []string) error {
 		return errors.New("too many args")
 	}
 	if len(args) == 1 && args[0] == placeholder {
-		return errors.New("invalid args")
+		contextName = kxConf.Previous.Context
+		ns = kxConf.Previous.Namespace
+		return nil
 	}
 	if len(args) >= 1 {
 		if args[0] == placeholder {
@@ -70,7 +72,13 @@ func list(conf *pkg.KubeConfig) {
 	fmt.Println(table)
 }
 
-func updateContext(contextName string, useSet bool) error {
+func updateContext(contextName, ns string, useSet bool) error {
+	var currentCtx pkg.CtxNsPair
+	var err error
+
+	if currentCtx, err = kubeConf.GetCurrentContextAndNamespace(); err != nil {
+	    return err
+	}
 	if useSet {
 		kubeConf.SetContext(contextName)
 	} else {
@@ -85,8 +93,32 @@ func updateContext(contextName string, useSet bool) error {
 			if err = kubeConf.SetNamespaceForContext(ctxPair.Context, ctxPair.Namespace); err != nil {
 				return errors.New("error setting namespace from favorite: " + err.Error())
 			}
-			return kubeConf.Save(kubePath)
 		}
 	}
-	return nil
+	if ns != "" {
+		if err := kubeConf.SetNamespaceForContext(contextName, ns); err != nil {
+			return err
+		}
+	}
+	if err = kxConf.SetPrevious(currentCtx); err != nil {
+		return err
+	}
+	return kubeConf.Save(kubePath)
+}
+
+
+func returnToPrevious() error {
+	var ctxPair pkg.CtxNsPair
+	var err error
+
+	if ctxPair, err = kxConf.GetPrevious(); err != nil {
+		return err
+	}
+	if err = kubeConf.UseContext(ctxPair.Context); err != nil {
+		return errors.New("error setting context from previous: " + err.Error())
+	}
+	if err = kubeConf.SetNamespaceForContext(ctxPair.Context, ctxPair.Namespace); err != nil {
+		return errors.New("error setting namespace from previous: " + err.Error())
+	}
+	return kubeConf.Save(kubePath)
 }

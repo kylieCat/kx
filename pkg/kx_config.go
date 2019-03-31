@@ -56,3 +56,16 @@ func (kx *KxConfig) FavoritesForContext(name string) Favorites {
 	}
 	return kx.Favorites.FavoritesForContext(name)
 }
+
+func (kx *KxConfig) GetPrevious() (CtxNsPair, error) {
+	if kx.Previous.Context == "" || kx.Previous.Namespace == "" {
+		return CtxNsPair{}, NewNoPreviousContextError()
+	}
+	return kx.Previous, nil
+}
+
+func (kx *KxConfig) SetPrevious(pair CtxNsPair) error {
+	kx.Previous = pair
+	kx.changed = true
+	return nil
+}

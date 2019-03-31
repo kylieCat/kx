@@ -10,6 +10,10 @@ type CtxNsPair struct {
 	Namespace string `json:"namespace" yaml:"namespace"`
 }
 
+func (c CtxNsPair) String() string {
+	return fmt.Sprintf("%s %s", c.Context, c.Namespace)
+}
+
 type Favorites map[string]CtxNsPair
 
 func (favorites Favorites) AddFavorite(name, ctx, ns string) {
