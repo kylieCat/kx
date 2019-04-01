@@ -4,6 +4,7 @@
 
 - New feature: ability to rename a context using `-r`. See README for example
 - New feature: ability to swap back to a previous context/namespace. See README for example
+- New feature: ability to list available color options and set them via a command
 - General code cleanup
 
 ### 0.3.1 - 2019-01-05T02:37:13Z

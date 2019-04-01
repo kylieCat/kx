@@ -96,7 +96,7 @@ The prompt is completely configurable. The parts of which are defined like so:
       separatorColor: color*
       colorOff: \033[0m  # special required value, will be depracated 
 
-_* see [color configuration](#colors)_
+_* see [color configuration](#colors)*_
 
 To display a prompt that appears like this:
 
@@ -136,8 +136,24 @@ How it looks with color:
 
 ### Colors<a name="colors"></a>
 
-Colors are configured using the name of the color. These names can be found in [`pkg/colors/colors.go`](pkg/colors/colors.go). This will be replaced in the future with a command to list them.
+Colors are configured using the name of the color. These names can be found in [`pkg/colors/colors.go`](pkg/colors/colors.go).
 
+You can print the available color options with the `kxcolors` command.
+
+    $ kx kxcolors 
+    Name
+    Aquamarine1
+    Aquamarine3
+    Black
+    Blue1
+    Blue3
+    ...
+    
+Each name will be displayed in the color it represents. You can add these names to your `.kx.yaml` manually or use the `set` command. After using `set` you will need to re-source the prompt command:
+
+    $ kx kxcolors set [-c|--context] <COLOR NAME> [-s|--separator] <COLOR NAME> [-n|--ns] <COLOR NAME>
+    $ eval "$(kx prompt)"
+    
 _Note: color names may change slightly in the future to be consistent with Go capitalization._
       
 ### Favorites
@@ -163,7 +179,7 @@ Favorites are also stored in in `.kx.yaml`. Should be pretty obvious how these w
 - [X] Ability to rename contexts.
 - [X] Return to previous context/namespace
 - [X] Work with locations of kubeconfig passed via the command line.
-- [ ] Command to show color options.
+- [X] Command to show color options.
 - [ ] Code clean up.
 - [ ] Better error messaging.
 
