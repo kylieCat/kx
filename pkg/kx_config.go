@@ -30,6 +30,10 @@ func (kx KxConfig) Save(path string) error {
 	return nil
 }
 
+func (kx *KxConfig) GetPrompt() *Prompt {
+	return &kx.Prompt
+}
+
 func (kx *KxConfig) AddFavorite(name, ctx, ns string) error {
 	kx.Favorites.AddFavorite(name, ctx, ns)
 	kx.changed = true

@@ -9,13 +9,14 @@ type Prompt struct {
 	ContextColor   string `yaml:"contextColor" json:"contextColor"`
 	NamespaceColor string `yaml:"namespaceColor" json:"namespaceColor"`
 	SeparatorColor string `yaml:"separatorColor" json:"separatorColor"`
-	ColorOff       string `json:"colorOff" yaml:"colorOff"`
+	ColorOff       string
 }
 
 func (p Prompt) FillColors() Prompt {
 	p.ContextColor = colors.Colors.Get(p.ContextColor)
 	p.NamespaceColor = colors.Colors.Get(p.NamespaceColor)
 	p.SeparatorColor = colors.Colors.Get(p.SeparatorColor)
+	p.ColorOff = colors.ColorOff
 	return p
 }
 

@@ -21,6 +21,7 @@ import (
 
 	"github.com/gosuri/uitable"
 	"github.com/kylie-a/kx/pkg"
+	"github.com/kylie-a/kx/pkg/colors"
 )
 
 func validateArgs(args []string) error {
@@ -72,12 +73,22 @@ func list(conf *pkg.KubeConfig) {
 	fmt.Println(table)
 }
 
+func listColors() {
+	table := uitable.New()
+	table.AddRow("Name")
+	for _, n := range colors.ColorOrder {
+		name := fmt.Sprintf("%s%s%s", colors.Colors.Get(n), n, colors.ColorOff)
+		table.AddRow(name)
+	}
+	fmt.Println(table)
+}
+
 func updateContext(contextName, ns string, useSet bool) error {
 	var currentCtx pkg.CtxNsPair
 	var err error
 
 	if currentCtx, err = kubeConf.GetCurrentContextAndNamespace(); err != nil {
-	    return err
+		return err
 	}
 	if useSet {
 		kubeConf.SetContext(contextName)
@@ -105,7 +116,6 @@ func updateContext(contextName, ns string, useSet bool) error {
 	}
 	return kubeConf.Save(kubePath)
 }
-
 
 func returnToPrevious() error {
 	var ctxPair pkg.CtxNsPair

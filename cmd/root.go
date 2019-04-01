@@ -24,7 +24,6 @@ import (
 
 const (
 	placeholder    = "-"
-	previousMarker = "--"
 )
 
 var (
@@ -139,7 +138,6 @@ func init() {
 	cobra.OnInitialize(initConfigPaths, initKubeConfig, initKxConfig)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kx.yaml)")
 	rootCmd.Flags().BoolVarP(&all, "all", "a", false, "Use to print list of contexts and namespace pairs")
-	rootCmd.Flags().BoolVarP(&noColor, "no-color", "c", true, "Turn off color")
 	rootCmd.Flags().StringVarP(&favorite, "favorite", "f", "", "set a favorite context namespace pair")
 	rootCmd.Flags().StringVarP(&newName, "rename", "r", "", "Change the name of a context")
 }
