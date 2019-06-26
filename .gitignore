@@ -2,3 +2,4 @@ bin
 .waypoint.yaml
 kubeconfig
 cmd/testcmd.go
+.venv

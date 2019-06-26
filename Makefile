@@ -7,7 +7,14 @@ build:
 install:
 	@go install
 
-release:
+## Create a virtualenv and install package for managing versions
+installbump:
+ifeq ($(wildcard ./.venv/.*),)
+	@python3 -m venv ./.venv
+	@./.venv/bin/pip install -U pip git+https://github.com/kylie-a/bumpversion.git
+endif
+
+release: installbump
 ifndef part
 	$(error 'part' is undefined. Use 'major', 'minor' or 'patch' as the part argument)
 endif
