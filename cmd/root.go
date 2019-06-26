@@ -113,7 +113,6 @@ $ kx -r new_name old_name
 				return err
 			}
 		}
-
 		if cmd.Flag("favorite").Changed {
 			if err := kxConf.AddFavorite(favorite, contextName, ns); err != nil {
 				return err

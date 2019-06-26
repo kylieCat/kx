@@ -1,5 +1,9 @@
 # kx Changelog
 
+### 0.4.1 - 2019-06-26
+
+- Fix bug in rename command
+
 ### 0.4.0 - 2019-03-31
 
 - New feature: ability to rename a context using `-r`. See README for example
