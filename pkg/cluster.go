@@ -6,6 +6,7 @@ type ClusterConf struct {
 	CertificateAuthorityData string `yaml:"certificate-authority-data,omitempty"`
 	CertificateAuthority     string `yaml:"certificate-authority,omitempty"`
 	Server                   string `yaml:"server,omitempty"`
+	InsecureSkipVerify bool `yaml:"insecure-skip-tls-verify,omitempty"`
 }
 
 type Cluster struct {

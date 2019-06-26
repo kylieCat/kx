@@ -79,11 +79,24 @@ Current	Context          	Namespace
 -->    	foo-eks-prd  	    foo
        	foo-gke-prd      	foo
        	foo-gke-stg      	foo
+
+Rename a context:
+$ kx -r new_name old_name
 `,
 	Args: func(cmd *cobra.Command, args []string) error {
 		return validateArgs(args)
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if cmd.Flag("rename").Changed {
+			if err := kubeConf.RenameContext(contextName, newName); err != nil {
+				return err
+			}
+			if err := kubeConf.UseContext(newName); err != nil {
+				return err
+			}
+			return kubeConf.Save(kubePath)
+		}
+
 		if len(args) == 0 {
 			if all {
 				list(kubeConf)
@@ -103,15 +116,6 @@ Current	Context          	Namespace
 
 		if cmd.Flag("favorite").Changed {
 			if err := kxConf.AddFavorite(favorite, contextName, ns); err != nil {
-				return err
-			}
-		}
-
-		if cmd.Flag("rename").Changed {
-			if err := kubeConf.RenameContext(contextName, newName); err != nil {
-				return err
-			}
-			if err := updateContext(newName, "", set); err != nil {
 				return err
 			}
 		}
