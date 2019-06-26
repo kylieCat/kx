@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 PART=$1
+[[ -v DIRTY ]] && ALLOW_DIRTY="--allow-dirty" || ALLOW_DIRTY=""
 
 get_version_info() {
     part=${1}
@@ -11,7 +12,7 @@ get_version_info() {
         out=$(.venv/bin/bumpversion ${part} --list ${ALLOW_DIRTY})
         new_version=$(printf "${out}\n" | grep new_version | sed 's/new_version=//')
         current_version=$(printf "${out}\n" | grep current_version | sed 's/current_version=//')
-        echo "${new_version}::${current_version}"
+        printf "${new_version}::${current_version}\n"
     fi
 }
 
@@ -26,7 +27,7 @@ get_message () {
 do_commit() {
     prevVer=${1}
     newVer=${2}
-    git commit --allow-empty -m "$(get_message ${part})"
+    git commit --allow-empty -m "$(get_message ${prevVer} ${newVer})"
 }
 
 do_tag() {
