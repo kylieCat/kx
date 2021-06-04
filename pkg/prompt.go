@@ -1,6 +1,6 @@
 package pkg
 
-import "github.com/kylie-a/kx/pkg/colors"
+import "github.com/kylieCat/kx/pkg/colors"
 
 type Prompt struct {
 	Separator      string `yaml:"separator" json:"separator"`
@@ -19,5 +19,3 @@ func (p Prompt) FillColors() Prompt {
 	p.ColorOff = colors.ColorOff
 	return p
 }
-
-

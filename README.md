@@ -4,7 +4,7 @@ A more convenient method for changing contexts and name spaces for kubectl
 
 ## Usage:
 
-    kx [context [namespace]] [-a|--all] [-s|--set] [--no-color]
+    kx [context [namespace]] [-a|--all] [-s|--set] [--no-color] [-r|--rename NEW_NAME]
 
 To add to prompt:
 

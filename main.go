@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/kylie-a/kx/cmd"
+import "github.com/kylieCat/kx/cmd"
 
 func main() {
 	cmd.Execute()

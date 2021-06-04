@@ -20,8 +20,8 @@ import (
 	"sort"
 
 	"github.com/gosuri/uitable"
-	"github.com/kylie-a/kx/pkg"
-	"github.com/kylie-a/kx/pkg/colors"
+	"github.com/kylieCat/kx/pkg"
+	"github.com/kylieCat/kx/pkg/colors"
 )
 
 func validateArgs(args []string) error {

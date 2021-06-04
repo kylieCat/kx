@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kylie-a/kx/pkg"
+	"github.com/kylieCat/kx/pkg"
 	"github.com/spf13/cobra"
 )
 

@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"errors"
-	"github.com/kylie-a/kx/pkg/colors"
+	"github.com/kylieCat/kx/pkg/colors"
 	"github.com/spf13/cobra"
 )
 
