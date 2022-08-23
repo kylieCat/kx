@@ -23,6 +23,14 @@ type UserConf struct {
 	Token             string       `yaml:"token,omitempty"`
 	ClientCertificate string       `yaml:"client-certificate,omitempty"`
 	ClientKey         string       `yaml:"client-key,omitempty"`
+	Exec              Exec         `yaml:"exec,omitempty"`
+}
+
+type Exec struct {
+	APIVersion         string `yaml:"apiVersion"`
+	Command            string `yaml:"command"`
+	InstallHint        string `yaml:"installHint"`
+	ProvideClusterInfo bool   `yaml:"provideClusterInfo"`
 }
 
 type User struct {

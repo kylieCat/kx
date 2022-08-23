@@ -1,8 +1,8 @@
 DIRTY := $(shell git diff --stat)
 
 build:
-	@rm -f bin/kx
-	@go build -o bin/kx
+	@rm -f .bin/kx
+	@go build -o .bin/kx
 
 install:
 	@go install
