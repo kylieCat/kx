@@ -27,10 +27,11 @@ type UserConf struct {
 }
 
 type Exec struct {
-	APIVersion         string `yaml:"apiVersion"`
-	Command            string `yaml:"command"`
-	InstallHint        string `yaml:"installHint"`
-	ProvideClusterInfo bool   `yaml:"provideClusterInfo"`
+	APIVersion         string   `yaml:"apiVersion"`
+	Command            string   `yaml:"command"`
+	Args               []string `yaml:"args"`
+	InstallHint        string   `yaml:"installHint"`
+	ProvideClusterInfo bool     `yaml:"provideClusterInfo"`
 }
 
 type User struct {
